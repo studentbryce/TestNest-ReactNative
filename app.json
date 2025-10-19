@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "TestNestStudent",
+    "name": "TestNest",
     "slug": "TestNestStudent",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -18,12 +18,25 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#fff9e5"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.bryce.rx.TestNestStudent"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-font"
+    ],
+    "updates": {
+      "url": "https://u.expo.dev/dd551b13-79a2-49a5-a2be-aecb5d7e5ff8"
+    },
+    "runtimeVersion": "1.0.0",
+    "extra": {
+      "eas": {
+        "projectId": "dd551b13-79a2-49a5-a2be-aecb5d7e5ff8"
+      }
     }
   }
 }
