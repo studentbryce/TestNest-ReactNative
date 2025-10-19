@@ -24,17 +24,29 @@ A comprehensive mobile application for Multiple Choice Question (MCQ) testing bu
 
 ## Quick Start
 
-1. Install dependencies:
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/studentbryce/TestNest-ReactNative.git
+   cd TestNest-ReactNative
+   ```
+
+2. Install dependencies:
    ```bash
    npm install
    ```
 
-2. Start the development server:
+3. Setup environment variables:
+   ```bash
+   cp .env.example .env
+   ```
+   Then edit `.env` and add your Supabase credentials.
+
+4. Start the development server:
    ```bash
    npx expo start
    ```
 
-3. Build for Android:
+5. Build for Android:
    ```bash
    eas build --platform android --profile preview
    ```
