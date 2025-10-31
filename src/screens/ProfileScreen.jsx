@@ -10,7 +10,6 @@ import { DatabaseService } from '../services/database';
 
 export default function ProfileScreen({ navigation }) {
   const { user, signOut } = useAuth();
-  const [showPassword, setShowPassword] = useState(false);
   const [userDetails, setUserDetails] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -64,9 +63,7 @@ export default function ProfileScreen({ navigation }) {
     }
   };
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
+
 
   const handleEditProfile = () => {
     navigation.navigate('EditProfile');
@@ -135,7 +132,7 @@ export default function ProfileScreen({ navigation }) {
     );
   }
 
-  const displayPassword = showPassword ? '••••••••' : '••••••••'; // Don't show actual password for security
+
 
   return (
     <View style={globalStyles.container}>
@@ -167,21 +164,6 @@ export default function ProfileScreen({ navigation }) {
           <View style={globalStyles.infoRow}>
             <Text style={globalStyles.infoLabel}>Full Name:</Text>
             <Text style={globalStyles.infoValue}>{userDetails.fullname}</Text>
-          </View>
-          
-          {/* Password field with eye toggle */}
-          <View style={globalStyles.infoRow}>
-            <Text style={globalStyles.infoLabel}>Password:</Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={globalStyles.infoValue}>{displayPassword}</Text>
-              <TouchableOpacity onPress={togglePasswordVisibility} style={{ marginLeft: 10 }}>
-                <Ionicons 
-                  name={showPassword ? 'eye-off' : 'eye'} 
-                  size={16} 
-                  color={colors.primary}
-                />
-              </TouchableOpacity>
-            </View>
           </View>
         </View>
 

@@ -182,6 +182,28 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const updateUserData = async (updatedData) => {
+    try {
+      console.log('🔄 Updating user data in AuthContext:', updatedData);
+      
+      // Update user state
+      const updatedUser = { ...user, ...updatedData };
+      setUser(updatedUser);
+      
+      // Update stored session
+      await AsyncStorage.setItem('userSession', JSON.stringify({ 
+        user: updatedUser, 
+        timestamp: Date.now() 
+      }));
+      
+      console.log('✅ User data updated in AuthContext and storage');
+      return { success: true };
+    } catch (error) {
+      console.error('❌ Update user data error:', error);
+      return { success: false, error: error.message };
+    }
+  };
+
   const signOut = async () => {
     try {
       setLoading(true);
@@ -211,6 +233,7 @@ export const AuthProvider = ({ children }) => {
     signUp,
     signIn,
     signOut,
+    updateUserData,
     setIsLoggedIn, // Keep for backward compatibility but prefer signOut()
   };
 

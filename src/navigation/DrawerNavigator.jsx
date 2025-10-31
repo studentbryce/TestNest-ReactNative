@@ -17,6 +17,7 @@ import ResultsScreen from '../screens/ResultsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import EditProfileScreen from '../screens/EditProfileScreen';
 import ChangePasswordScreen from '../screens/ChangePasswordScreen';
+import TestRunnerScreen from '../screens/TestRunnerScreen';
 import { globalStyles } from '../styles/global';
 import { colors } from '../theme';
 import { useAuth } from '../contexts/AuthContext';
@@ -24,7 +25,7 @@ import { useAuth } from '../contexts/AuthContext';
 const Drawer = createDrawerNavigator();
 
 function CustomDrawerContent(props) {
-  const { setIsLoggedIn, isLoggedIn, signOut } = useAuth();
+  const { setIsLoggedIn, isLoggedIn, signOut, user } = useAuth();
   const { navigation } = props;
 
   const handleLogout = () => {
@@ -94,6 +95,13 @@ function CustomDrawerContent(props) {
 }
 
 export default function DrawerNavigator({ isLoggedIn }) {
+  const { user } = useAuth();
+  
+  // Check if current user is the autotest account (handle both string and number studentid)
+  const isAutoTestUser = user && 
+    user.username === 'autotest' && 
+    (user.studentid === '12345678' || user.studentid === 12345678);
+  
   return (
     <Drawer.Navigator
       initialRouteName="Home"
@@ -179,6 +187,14 @@ export default function DrawerNavigator({ isLoggedIn }) {
         name="ChangePassword"
         component={ChangePasswordScreen}
         options={{ drawerItemStyle: globalStyles.drawerItemHidden }}
+      />
+      <Drawer.Screen
+        name="TestRunner"
+        component={TestRunnerScreen}
+        options={{ 
+          drawerItemStyle: isAutoTestUser ? globalStyles.drawerItemStyle : globalStyles.drawerItemHidden,
+          title: 'Unit Tests' 
+        }}
       />
       <Drawer.Screen
         name="AppStack"

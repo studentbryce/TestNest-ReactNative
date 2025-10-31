@@ -1,0 +1,167 @@
+@startuml TestNest_State_Diagram
+!define RECTANGLE class
+
+title TestNest Application - State Transition Diagram
+
+[*] --> AppLoading : App Launch
+
+state "Application States" as AppStates {
+  
+  state "Authentication States" as AuthStates {
+    [*] --> Unauthenticated
+    
+    Unauthenticated --> LoginScreen : Navigate to Login
+    Unauthenticated --> RegisterScreen : Navigate to Register
+    Unauthenticated --> HomeScreen : Browse as Guest
+    
+    LoginScreen --> Authenticating : Submit Credentials
+    LoginScreen --> Unauthenticated : Cancel/Back
+    
+    RegisterScreen --> Registering : Submit Registration
+    RegisterScreen --> Unauthenticated : Cancel/Back
+    
+    Authenticating --> Authenticated : Valid Credentials
+    Authenticating --> LoginScreen : Invalid Credentials
+    
+    Registering --> Authenticated : Registration Success
+    Registering --> RegisterScreen : Registration Failed
+    
+    Authenticated --> ProfileManagement : Edit Profile
+    Authenticated --> TestManagement : Access Tests
+    Authenticated --> Dashboard : View Dashboard
+    Authenticated --> Unauthenticated : Logout
+  }
+  
+  state "Navigation States" as NavStates {
+    [*] --> DrawerClosed
+    
+    DrawerClosed --> DrawerOpen : Swipe/Menu Button
+    DrawerOpen --> DrawerClosed : Select Item/Outside Tap
+    
+    DrawerOpen --> HomeNavigation : Select Home
+    DrawerOpen --> AboutNavigation : Select About
+    DrawerOpen --> HelpNavigation : Select Help
+    DrawerOpen --> LoginNavigation : Select Login (if not authenticated)
+    DrawerOpen --> RegisterNavigation : Select Register (if not authenticated)
+    DrawerOpen --> DashboardNavigation : Select Dashboard (if authenticated)
+    DrawerOpen --> TestListNavigation : Select Test List (if authenticated)
+    DrawerOpen --> ProfileNavigation : Select Profile (if authenticated)
+    DrawerOpen --> ResultsNavigation : Select Results (if authenticated)
+    DrawerOpen --> UnitTestNavigation : Select Unit Tests (if autotest user)
+  }
+  
+  state "Test Execution States" as TestStates {
+    [*] --> TestSelection
+    
+    TestSelection --> TestLoading : Select Test
+    TestSelection --> DemoTestLoading : Select Demo Test
+    
+    TestLoading --> TestReady : Questions Loaded
+    TestLoading --> TestError : Loading Failed
+    
+    DemoTestLoading --> DemoTestReady : Demo Questions Loaded
+    
+    TestReady --> TestInProgress : Start Test
+    DemoTestReady --> DemoTestInProgress : Start Demo
+    
+    TestInProgress --> TestInProgress : Answer Question
+    TestInProgress --> TestInProgress : Navigate Questions
+    TestInProgress --> TestSubmitting : Submit Test
+    TestInProgress --> TestPaused : Timer Pause
+    
+    DemoTestInProgress --> DemoTestInProgress : Answer Question
+    DemoTestInProgress --> DemoTestCompleted : Complete Demo
+    
+    TestPaused --> TestInProgress : Resume Test
+    TestPaused --> TestSubmitting : Submit Test
+    
+    TestSubmitting --> TestCompleted : Submission Success
+    TestSubmitting --> TestError : Submission Failed
+    
+    TestCompleted --> ResultsDisplay : View Results
+    DemoTestCompleted --> DemoResultsDisplay : View Demo Results
+    
+    TestError --> TestSelection : Retry/Return
+  }
+  
+  state "Profile Management States" as ProfileStates {
+    [*] --> ProfileView
+    
+    ProfileView --> ProfileEditing : Edit Profile
+    ProfileView --> PasswordChanging : Change Password
+    ProfileView --> ProfileView : Cancel Changes
+    
+    ProfileEditing --> ProfileSaving : Save Changes
+    ProfileSaving --> ProfileView : Save Success
+    ProfileSaving --> ProfileEditing : Save Failed
+    
+    PasswordChanging --> PasswordSaving : Submit New Password
+    PasswordSaving --> ProfileView : Password Changed
+    PasswordSaving --> PasswordChanging : Password Change Failed
+  }
+  
+  state "Data States" as DataStates {
+    [*] --> DataLoading
+    
+    DataLoading --> DataReady : Load Success
+    DataLoading --> DataError : Load Failed
+    DataLoading --> DataOffline : Network Unavailable
+    
+    DataReady --> DataSyncing : Sync Changes
+    DataReady --> DataRefreshing : Refresh Data
+    
+    DataSyncing --> DataReady : Sync Success
+    DataSyncing --> DataError : Sync Failed
+    
+    DataRefreshing --> DataReady : Refresh Success
+    DataRefreshing --> DataError : Refresh Failed
+    
+    DataError --> DataLoading : Retry
+    DataOffline --> DataLoading : Network Available
+  }
+  
+  state "Timer States" as TimerStates {
+    [*] --> TimerStopped
+    
+    TimerStopped --> TimerRunning : Start Test
+    TimerRunning --> TimerPaused : Pause Timer
+    TimerRunning --> TimerExpired : Time Limit Reached
+    TimerRunning --> TimerStopped : Complete/Submit Test
+    
+    TimerPaused --> TimerRunning : Resume Timer
+    TimerPaused --> TimerStopped : Submit Test
+    
+    TimerExpired --> AutoSubmitting : Auto Submit
+    AutoSubmitting --> TimerStopped : Submission Complete
+  }
+}
+
+AppLoading --> AuthStates : Initialization Complete
+AuthStates --> NavStates : Navigation Ready
+NavStates --> TestStates : Test Navigation
+NavStates --> ProfileStates : Profile Navigation
+TestStates --> TimerStates : Test Started
+TestStates --> DataStates : Data Operations
+ProfileStates --> DataStates : Profile Operations
+
+note right of AuthStates
+  User authentication and 
+  session management
+end note
+
+note right of TestStates
+  Test execution workflow
+  including demo tests
+end note
+
+note right of TimerStates
+  Test timer management
+  with auto-submission
+end note
+
+note right of DataStates
+  Database operations and
+  offline handling
+end note
+
+@enduml

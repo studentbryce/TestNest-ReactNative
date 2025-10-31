@@ -424,6 +424,49 @@ export class DatabaseService {
     }
   }
 
+  // Update user password
+  static async updateUserPassword(studentID, currentPassword, newPassword) {
+    try {
+      console.log('🔒 Updating password for StudentID:', studentID);
+      
+      // First verify the current password
+      const user = await this.getUserByStudentID(studentID);
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      // Hash the current password to compare
+      const CryptoJS = require('crypto-js');
+      const hashedCurrentPassword = CryptoJS.SHA256(currentPassword).toString();
+      
+      if (user.password !== hashedCurrentPassword) {
+        throw new Error('Current password is incorrect');
+      }
+
+      // Hash the new password
+      const hashedNewPassword = CryptoJS.SHA256(newPassword).toString();
+      
+      // Update the password in the database
+      const { data, error } = await supabase
+        .from('users')
+        .update({ password: hashedNewPassword })
+        .eq('studentid', parseInt(studentID))
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('❌ Error updating password:', error);
+        throw error;
+      }
+      
+      console.log('✅ Password updated successfully for:', data?.username);
+      return data;
+    } catch (error) {
+      console.error('❌ DatabaseService.updateUserPassword error:', error);
+      throw error;
+    }
+  }
+
   // Debug method to check Results table content - FIXED
   static async debugResultsTable() {
     try {

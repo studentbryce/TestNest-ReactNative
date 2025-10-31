@@ -11,6 +11,7 @@ import {
   KeyboardAvoidingView,
   Platform 
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { globalStyles } from '../styles/global';
 import { colors } from '../theme';
@@ -37,23 +38,30 @@ export default function EditProfileScreen({ navigation }) {
   const loadUserData = async () => {
     try {
       setLoading(true);
+      console.log('📋 Loading user data...');
+      console.log('👤 Current user from context:', user);
       
       let userData = user;
       
       // Try to get fresh data from database if available
       if (user?.studentid && DatabaseService.getUserByStudentID) {
+        console.log('🔄 Fetching fresh data from database for student:', user.studentid);
         const freshData = await DatabaseService.getUserByStudentID(user.studentid);
         if (freshData) {
+          console.log('✅ Fresh data retrieved:', freshData);
           userData = freshData;
         }
       }
       
-      setFormData({
+      const formDataToSet = {
         firstname: userData.firstname || '',
         lastname: userData.lastname || '',
         username: userData.username || '',
-        studentid: userData.studentid || ''
-      });
+        studentid: userData.studentid ? userData.studentid.toString() : ''
+      };
+      
+      console.log('📋 Setting form data to:', formDataToSet);
+      setFormData(formDataToSet);
     } catch (error) {
       console.error('❌ Error loading user data:', error);
       Alert.alert('Error', 'Failed to load profile data');
@@ -63,28 +71,37 @@ export default function EditProfileScreen({ navigation }) {
   };
 
   const validateForm = () => {
+    console.log('🔍 Validating form with data:', formData);
     const newErrors = {};
     
-    if (!formData.firstname.trim()) {
+    if (!formData.firstname || !formData.firstname.toString().trim()) {
       newErrors.firstname = 'First name is required';
+      console.log('❌ First name validation failed');
     }
     
-    if (!formData.lastname.trim()) {
+    if (!formData.lastname || !formData.lastname.toString().trim()) {
       newErrors.lastname = 'Last name is required';
+      console.log('❌ Last name validation failed');
     }
     
-    if (!formData.username.trim()) {
+    if (!formData.username || !formData.username.toString().trim()) {
       newErrors.username = 'Username is required';
-    } else if (formData.username.length < 3) {
+      console.log('❌ Username validation failed');
+    } else if (formData.username.toString().length < 3) {
       newErrors.username = 'Username must be at least 3 characters';
+      console.log('❌ Username too short');
     }
     
-    if (!formData.studentid.trim()) {
+    if (!formData.studentid || !formData.studentid.toString().trim()) {
       newErrors.studentid = 'Student ID is required';
+      console.log('❌ Student ID validation failed');
     }
     
+    console.log('📋 Validation errors:', newErrors);
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    const isValid = Object.keys(newErrors).length === 0;
+    console.log('✅ Form is valid:', isValid);
+    return isValid;
   };
 
   const handleInputChange = (field, value) => {
@@ -103,27 +120,58 @@ export default function EditProfileScreen({ navigation }) {
   };
 
   const handleSave = async () => {
+    console.log('🔄 Save button pressed!');
+    console.log('📋 Current form data:', formData);
+    console.log('👤 Current user:', user);
+    
+    // Check if form data is empty (might indicate loading issue)
+    const hasFormData = formData.firstname || formData.lastname || formData.username || formData.studentid;
+    if (!hasFormData) {
+      console.log('❌ Form data appears to be empty');
+      Alert.alert('Error', 'Form data is empty. Please try refreshing the screen.');
+      return;
+    }
+    
     if (!validateForm()) {
+      console.log('❌ Form validation failed');
       Alert.alert('Validation Error', 'Please fix the errors before saving');
       return;
     }
 
+    console.log('✅ Form validation passed');
     try {
       setSaving(true);
       
       const updatedData = {
-        ...formData,
-        fullname: `${formData.firstname} ${formData.lastname}`
+        firstname: formData.firstname,
+        lastname: formData.lastname,
+        username: formData.username,
+        // Don't include fullname as it's not a database column
+        // Don't include studentid in updates as it's the identifier
       };
       
-      // Update in database if service is available
-      if (DatabaseService.updateUser && user.id) {
-        await DatabaseService.updateUser(user.id, updatedData);
-      }
-      
-      // Update in auth context
-      if (updateUserData) {
-        await updateUserData(updatedData);
+      // Update in database using studentid
+      if (DatabaseService.updateUserProfile && user.studentid) {
+        console.log('🔄 Updating profile in database for student:', user.studentid);
+        const dbResult = await DatabaseService.updateUserProfile(user.studentid, updatedData);
+        console.log('✅ Database update result:', dbResult);
+        
+        // Update in auth context (this will also update AsyncStorage)
+        // Add fullname for local context (not saved to database)
+        if (updateUserData) {
+          const contextUpdateData = {
+            ...updatedData,
+            fullname: `${updatedData.firstname} ${updatedData.lastname}`
+          };
+          await updateUserData(contextUpdateData);
+        }
+        
+      } else {
+        console.error('❌ Missing database service or student ID:', {
+          hasService: !!DatabaseService.updateUserProfile,
+          studentId: user.studentid
+        });
+        throw new Error('Unable to update profile - missing service or student ID');
       }
       
       Alert.alert(
@@ -276,7 +324,15 @@ export default function EditProfileScreen({ navigation }) {
               globalStyles.primaryButton,
               saving && globalStyles.buttonDisabled
             ]}
-            onPress={handleSave}
+            onPress={() => {
+              console.log('🎯 Save button touched!');
+              console.log('📋 Form data at button press:', formData);
+              console.log('👤 User data at button press:', user);
+              console.log('🔍 Save button disabled?', saving);
+              
+              // Simple test - call handleSave directly
+              handleSave();
+            }}
             disabled={saving}
             activeOpacity={0.8}
           >

@@ -93,9 +93,17 @@ export default function ChangePasswordScreen({ navigation }) {
       // Verify current password first (this would need to be implemented in your auth service)
       // For now, we'll simulate the password change
       
-      // Update password in database if service is available
-      if (DatabaseService.updateUserPassword && user.id) {
-        await DatabaseService.updateUserPassword(user.id, formData.currentPassword, formData.newPassword);
+      // Update password in database using studentid
+      if (DatabaseService.updateUserPassword && user.studentid) {
+        console.log('🔄 Updating password in database for student:', user.studentid);
+        await DatabaseService.updateUserPassword(user.studentid, formData.currentPassword, formData.newPassword);
+        console.log('✅ Password updated successfully in database');
+      } else {
+        console.error('❌ Missing database service or student ID:', {
+          hasService: !!DatabaseService.updateUserPassword,
+          studentId: user.studentid
+        });
+        throw new Error('Unable to update password - missing service or student ID');
       }
       
       Alert.alert(
