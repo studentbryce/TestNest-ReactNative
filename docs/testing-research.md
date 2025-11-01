@@ -30,6 +30,7 @@
   - TypeScript support
   - Actor model for complex state management
 
+
 ### 2. Commercial Test Plan Recording Methods
 
 #### **TestRail**
@@ -69,6 +70,7 @@
   - Test Procedure Specification
   - Test Execution Report
 
+
 ### 3. Usability Testing Methods
 
 #### **System Usability Scale (SUS)**
@@ -98,30 +100,36 @@
 - **Purpose**: Compare different UI variations
 - **Metrics**: Conversion rates, task completion, user engagement
 
-### 4. Mobile-Specific Testing Tools
 
-#### **Detox (React Native E2E Testing)**
-- **Purpose**: End-to-end testing for React Native apps
-- **Advantages**:
-  - Gray box testing approach
-  - Cross-platform (iOS/Android)
-  - CI/CD integration
-  - Device and simulator support
+### 4. Unit & Component Testing Frameworks
 
-#### **Maestro (Mobile UI Testing)**
-- **Purpose**: Simple, declarative mobile UI testing
-- **Advantages**:
-  - Human-readable test scripts
-  - Built-in assertions
-  - Cross-platform support
-  - Video recording of test runs
+#### **Jest**
+- **Industry Standard**: JavaScript testing framework developed by Meta
+- **Features**:
+  - Zero configuration setup for React Native projects
+  - Built-in test runner, assertion library, and mocking capabilities
+  - Snapshot testing for UI component regression testing
+  - Code coverage reporting with detailed metrics
+  - Parallel test execution for faster builds
+- **Advantages**: Excellent React Native integration, extensive ecosystem
 
-#### **Appium**
-- **Industry Standard**: Cross-platform mobile automation
-- **Advantages**:
-  - Native, hybrid, and web app support
-  - Multiple programming languages
-  - Large community and ecosystem
+#### **React Testing Library**
+- **Philosophy**: Testing focused on user interactions rather than implementation details
+- **Features**:
+  - Simple API for rendering and interacting with React Native components
+  - Built-in accessibility testing utilities
+  - Async utilities for testing asynchronous operations
+  - Custom queries for finding elements by text, role, etc.
+- **Advantages**: Encourages best testing practices, maintains component behavior focus
+
+#### **React Native Testing Library**
+- **Extension**: Specialized version of React Testing Library for React Native
+- **Features**:
+  - Native component rendering (Text, View, TouchableOpacity)
+  - Event simulation (press, changeText, scroll)
+  - Query utilities optimized for mobile UI patterns
+  - Integration with Jest for complete testing solution
+
 
 ---
 
@@ -129,24 +137,41 @@
 
 ### **Selected Tools:**
 
-1. **GUI State Modeling**: PlantUML + XState integration
+1. **Unit Testing Framework**: Jest + React Testing Library
+   - **Jest**: Industry-standard JavaScript testing framework
+   - **React Testing Library**: Component testing focused on user interactions
+   - **Advantages**:
+     - Built-in mocking capabilities
+     - Snapshot testing for UI regression detection
+     - Code coverage reporting
+     - Excellent React Native integration
+   - **Already Implemented**: 22 passing tests with comprehensive coverage
+
+2. **GUI State Modeling**: PlantUML + XState integration
    - Cost-effective and professional
    - Version controllable
    - Integration with existing development workflow
 
-2. **Test Recording**: IEEE 829 Standard + Custom JSON format
+3. **Test Recording**: IEEE 829 Standard + Custom JSON format
    - No licensing costs
    - Industry-recognized format
    - Easy integration with existing unit test framework
 
-3. **Usability Testing**: System Usability Scale (SUS) + Task-based testing
+4. **Usability Testing**: System Usability Scale (SUS) + Task-based testing
    - Industry standard
    - Quick implementation
    - Quantifiable results
 
 ### **Implementation Approach:**
-1. Create state transition diagrams using PlantUML
-2. Implement IEEE 829 compliant test documentation
-3. Build SUS questionnaire into the application
-4. Create task-based testing scenarios
-5. Integrate with existing unit test framework
+1. **Maintain Jest + React Testing Library setup** for comprehensive unit and component testing
+2. Create state transition diagrams using PlantUML
+3. Implement IEEE 829 compliant test documentation
+4. Build SUS questionnaire into the application
+5. Create task-based testing scenarios
+6. **Expand test coverage** using existing Jest framework for integration tests
+
+### **Implementation Strategy & Rationale**
+
+The testing approach for TestNest was designed with both educational requirements and industry best practices in mind. The foundation of our testing strategy centers on **Jest and React Testing Library**, which provide a robust, industry-standard framework for unit and component testing. This choice was driven by their seamless integration with React Native, zero-configuration setup, and comprehensive feature set including snapshot testing, mocking capabilities, and detailed code coverage reporting. The current implementation demonstrates 22 passing tests with comprehensive coverage across critical application components, establishing a solid baseline for quality assurance.
+
+The selection of complementary tools follows a cost-effective, open-source approach suitable for academic projects while maintaining professional standards. **PlantUML** was chosen for GUI state modeling due to its text-based approach that integrates well with version control systems and supports complex state hierarchies essential for modeling TestNest's authentication flows, navigation states, and test execution sequences. The decision to implement **IEEE 829 standard documentation** rather than expensive commercial platforms like TestRail ($37/user/month) provides industry-recognized test documentation without licensing costs, making it accessible for student projects while teaching proper documentation practices. For usability testing, the **System Usability Scale (SUS)** offers a validated, quantitative assessment tool that can be easily integrated into the application, providing measurable usability metrics that align with academic research requirements and industry benchmarks.

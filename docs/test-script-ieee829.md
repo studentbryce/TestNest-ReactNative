@@ -344,6 +344,146 @@ Testing covers all major application functions including:
 
 ---
 
+## Test Case TC010: Profile Management Functionality
+**Priority:** High  
+**Type:** Functional  
+**Prerequisites:** User logged in with valid account
+
+### Test Steps:
+1. **Access Profile Screen**
+   - Action: Navigate to Profile from drawer menu
+   - Expected: Profile screen displays user information
+   - Actual: _______________
+   - Result: ☐ Pass ☐ Fail
+
+2. **Edit Profile Information**
+   - Action: Tap "Edit Profile" and modify user details
+   - Expected: Form displays current data, accepts changes
+   - Actual: _______________
+   - Result: ☐ Pass ☐ Fail
+
+3. **Change Password**
+   - Action: Use "Change Password" functionality
+   - Expected: Current password validation, secure update
+   - Actual: _______________
+   - Result: ☐ Pass ☐ Fail
+
+4. **Verify Data Persistence**
+   - Action: Logout and login again, check profile
+   - Expected: Updated information persists in database
+   - Actual: _______________
+   - Result: ☐ Pass ☐ Fail
+
+**Overall Result:** ☐ Pass ☐ Fail  
+**Comments:** _______________
+
+---
+
+## Test Case TC011: Component Interaction Testing
+**Priority:** Medium  
+**Type:** Functional  
+**Prerequisites:** Application running on test device
+
+### Test Steps:
+1. **Form Input Validation**
+   - Action: Enter various data types in input fields
+   - Expected: Proper validation and error handling
+   - Actual: _______________
+   - Result: ☐ Pass ☐ Fail
+
+2. **Button Press Responses**
+   - Action: Test all interactive buttons and touchable elements
+   - Expected: Immediate visual feedback and correct actions
+   - Actual: _______________
+   - Result: ☐ Pass ☐ Fail
+
+3. **Multi-Component State Management**
+   - Action: Test independent state across multiple form inputs
+   - Expected: Components maintain separate states correctly
+   - Actual: _______________
+   - Result: ☐ Pass ☐ Fail
+
+**Overall Result:** ☐ Pass ☐ Fail  
+**Comments:** _______________
+
+---
+
+## Test Case TC012: Authentication Context Testing
+**Priority:** High  
+**Type:** Functional  
+**Prerequisites:** Test environment with context providers
+
+### Test Steps:
+1. **Hook State Management**
+   - Action: Test useAuth hook initialization and state updates
+   - Expected: Proper initial state and context availability
+   - Actual: _______________
+   - Result: ☐ Pass ☐ Fail
+
+2. **Context Provider Wrapping**
+   - Action: Verify AuthProvider wraps components correctly
+   - Expected: Child components access auth state without errors
+   - Actual: _______________
+   - Result: ☐ Pass ☐ Fail
+
+3. **Multi-Component Context Access**
+   - Action: Test multiple components accessing same auth context
+   - Expected: Consistent state across all consuming components
+   - Actual: _______________
+   - Result: ☐ Pass ☐ Fail
+
+4. **Context Error Handling**
+   - Action: Test useAuth usage without AuthProvider
+   - Expected: Appropriate error handling and user feedback
+   - Actual: _______________
+   - Result: ☐ Pass ☐ Fail
+
+**Overall Result:** ☐ Pass ☐ Fail  
+**Comments:** _______________
+
+---
+
+## Test Case TC013: TestScreen Component Testing
+**Priority:** High  
+**Type:** Functional  
+**Prerequisites:** Valid test data and route parameters
+
+### Test Steps:
+1. **Component Rendering**
+   - Action: Navigate to TestScreen with valid parameters
+   - Expected: Component renders without crashes or errors
+   - Actual: _______________
+   - Result: ☐ Pass ☐ Fail
+
+2. **Route Parameter Handling**
+   - Action: Test with various route parameter configurations
+   - Expected: Proper handling of both valid and missing parameters
+   - Actual: _______________
+   - Result: ☐ Pass ☐ Fail
+
+3. **Loading State Management**
+   - Action: Monitor component during data loading operations
+   - Expected: Proper loading indicators and state transitions
+   - Actual: _______________
+   - Result: ☐ Pass ☐ Fail
+
+4. **Database Operations Integration**
+   - Action: Test async database operations within component
+   - Expected: Proper async handling and error management
+   - Actual: _______________
+   - Result: ☐ Pass ☐ Fail
+
+5. **Context Integration**
+   - Action: Test timer and navigation context integration
+   - Expected: Proper integration with all required contexts
+   - Actual: _______________
+   - Result: ☐ Pass ☐ Fail
+
+**Overall Result:** ☐ Pass ☐ Fail  
+**Comments:** _______________
+
+---
+
 ## 4. TEST EXECUTION SUMMARY
 
 ### 4.1 Test Results Summary
@@ -358,11 +498,15 @@ Testing covers all major application functions including:
 | TC007 | Data Persistence | High | ☐ Pass ☐ Fail | |
 | TC008 | Error Handling | Medium | ☐ Pass ☐ Fail | |
 | TC009 | Unit Test Execution | Medium | ☐ Pass ☐ Fail | |
+| TC010 | Profile Management Functionality | High | ☐ Pass ☐ Fail | |
+| TC011 | Component Interaction Testing | Medium | ☐ Pass ☐ Fail | |
+| TC012 | Authentication Context Testing | High | ☐ Pass ☐ Fail | |
+| TC013 | TestScreen Component Testing | High | ☐ Pass ☐ Fail | |
 
 ### 4.2 Overall Assessment
-- **Total Test Cases:** 9
-- **Passed:** ___/9
-- **Failed:** ___/9
+- **Total Test Cases:** 13
+- **Passed:** ___/13
+- **Failed:** ___/13
 - **Pass Rate:** ___%
 
 ### 4.3 Defects Identified
