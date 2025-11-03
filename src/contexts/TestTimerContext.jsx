@@ -50,7 +50,22 @@ export const TestTimerProvider = ({ children }) => {
 
   const setActiveTest = (testId) => {
     console.log('🎯 Setting active test:', testId, 'Previous:', activeTestIdRef.current);
+    
+    // If there's already an active test that's different, clear it first
+    if (activeTestIdRef.current && activeTestIdRef.current !== testId) {
+      console.log('🛑 Clearing previous active test:', activeTestIdRef.current, 'before setting new test:', testId);
+      
+      // Clear the timer for the previous test
+      if (activeTimerRef.current) {
+        clearInterval(activeTimerRef.current);
+        activeTimerRef.current = null;
+        console.log('✅ Previous test timer cleared');
+      }
+    }
+    
+    // Set the new active test
     activeTestIdRef.current = testId;
+    console.log('✅ Active test set to:', testId);
   };
 
   const clearActiveTest = () => {

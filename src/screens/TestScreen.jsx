@@ -11,7 +11,7 @@ import { DatabaseService } from '../services/database';
 
 export default function TestScreen({ navigation, route }) {
     const { user } = useAuth();
-    const { registerTimer, clearTimer, isActiveTest, setActiveTest, clearActiveTest } = useTestTimer();
+    const { registerTimer, clearTimer, isActiveTest, setActiveTest, clearActiveTest, activeTestId } = useTestTimer();
     const { test } = route?.params || {};
     
     const [questions, setQuestions] = useState([]);
@@ -33,6 +33,12 @@ export default function TestScreen({ navigation, route }) {
     // Calculate remaining time percentage for circular progress
     const timeRemainingPercentage = totalTime > 0 ? (timeRemaining / totalTime) * 100 : 0;
 
+    // Ensure component mounted ref is properly set on mount
+    useEffect(() => {
+        console.log('🏗️ TestScreen mounting for test:', test?.testid);
+        componentMountedRef.current = true;
+    }, [test?.testid]);
+
     // Memoize the handleTimeUp function to prevent unnecessary re-renders
     const handleTimeUp = useCallback(() => {
         console.log('⏰ Time is up! Auto-submitting test...');
@@ -45,20 +51,43 @@ export default function TestScreen({ navigation, route }) {
         );
     }, []);
 
-    // Reset everything when test changes or component mounts
+    // MAIN TIMER RESET - This is triggered when "Start Test" button is pressed
     useEffect(() => {
         if (test?.testid) {
-            console.log('🔄 TestScreen mounted for test:', test.testid);
+            console.log('� START TEST BUTTON PRESSED - Resetting everything for test:', test.testid);
             console.log('🔍 Full test object:', test);
             console.log('🔍 Test properties - ID:', test.testid, 'Title:', test.testtitle, 'Time:', test.timelimit);
             
-            // Clear any previous active test and timers first
+            // IMMEDIATE AND COMPLETE TIMER RESET FOR NEW TEST START
+            console.log('🛑 FORCE CLEARING ALL PREVIOUS TESTS AND TIMERS');
             clearActiveTest();
             
+            // Clear any existing timer immediately
+            if (timerRef.current) {
+                clearInterval(timerRef.current);
+                timerRef.current = null;
+                console.log('✅ Cleared existing timer interval');
+            }
+            
+            // Reset all timer state immediately
+            setTimeRemaining(0);
+            setTimerActive(false);
+            console.log('✅ Reset timer state to 0 and inactive');
+            
             // Set this test as the active test
+            console.log('🎯 Setting test as active:', test.testid);
             setActiveTest(test.testid);
             
+            // Reset all test state including timer
             resetTestState();
+            
+            // Force reset timer state for new test
+            console.log('🔄 Forcing timer reset for new test. Total time should be:', totalTime);
+            setTimeRemaining(0); // Start with 0 so initialization effect can catch it
+            setTimerActive(false);
+            
+            // Timer will be initialized by the useEffect once questions load
+            
             loadTestQuestions();
         } else {
             console.log('❌ No valid test object found. Test object:', test);
@@ -82,18 +111,47 @@ export default function TestScreen({ navigation, route }) {
 
     // Initialize timer once questions are loaded
     useEffect(() => {
-        if (questions.length > 0 && timeRemaining === 0 && !timerActive && componentMountedRef.current && test?.testid) {
-            console.log('🔄 Starting timer with total time:', totalTime, 'for test:', test.testid);
-            console.log('🔍 Is test active before starting timer?', isActiveTest(test.testid));
+        if (questions.length > 0 && componentMountedRef.current && test?.testid && totalTime > 0) {
+            console.log('🔄 Initializing timer for new test:', test.testid);
+            console.log('� Timer state check:', {
+                questionsCount: questions.length,
+                timeRemaining,
+                timerActive,
+                totalTime,
+                isActive: isActiveTest(test.testid)
+            });
             
-            if (isActiveTest(test.testid)) {
+            // CRITICAL: Only initialize timer if this test is actually the active test
+            if (!isActiveTest(test.testid)) {
+                console.log('❌ NOT starting timer - test', test.testid, 'is not active. Active test is:', activeTestId);
+                return;
+            }
+            
+            // Initialize and activate timer if needed - PREVENT CONSTANT RESETS
+            if ((timeRemaining === 0 || !timerActive) && totalTime > 0) {
+                console.log('✅ Initializing/activating timer with total time:', totalTime, 'for active test:', test.testid);
                 setTimeRemaining(totalTime);
                 setTimerActive(true);
             } else {
-                console.log('❌ Cannot start timer - test is not active');
+                console.log('⏭️ Timer already initialized and active - skipping. Time:', timeRemaining, 'Active:', timerActive);
             }
         }
-    }, [questions.length, totalTime, timerActive, timeRemaining, test?.testid]);
+    }, [questions.length, test?.testid]); // REMOVED problematic dependencies that cause loops
+
+    // Force timer reset ONLY when test ID changes - SIMPLIFIED TO PREVENT LOOPS
+    useEffect(() => {
+        if (test?.testid && componentMountedRef.current && isActiveTest(test.testid)) {
+            console.log('🔄 Test ID changed - checking timer state for:', test.testid);
+            
+            // Initialize with current time remaining state, but don't auto-start timer
+            // Let "Start Test" button be the primary trigger for fresh timer
+            if (timeRemaining === 0 && totalTime > 0) {
+                console.log('🔥 Setting initial time (inactive) to', totalTime);
+                setTimeRemaining(totalTime);
+                // Don't auto-activate timer - wait for user to click "Start Test"
+            }
+        }
+    }, [test?.testid]); // ONLY depend on testid to prevent constant re-runs
 
     // Timer effect with global management - SIMPLIFIED
     useEffect(() => {
@@ -102,9 +160,15 @@ export default function TestScreen({ navigation, route }) {
             return;
         }
 
-        // Check if this is the active test
+        // Check if this is the active test - CRITICAL FOR PREVENTING MULTIPLE TIMERS
         if (!isActiveTest(test.testid)) {
-            console.log('⚠️ Timer stopped - test not active');
+            console.log('⚠️ Timer stopped - test', test.testid, 'is not active. Active test:', activeTestId);
+            // Clear timer for inactive test
+            if (timerRef.current) {
+                clearInterval(timerRef.current);
+                timerRef.current = null;
+                console.log('🛑 Cleared timer for inactive test:', test.testid);
+            }
             return;
         }
 
@@ -162,22 +226,26 @@ export default function TestScreen({ navigation, route }) {
     }, [timeRemaining, timerActive, test?.TestID]); // Simplified dependencies
 
     const resetTestState = () => {
-        console.log('🔄 Resetting test state for test:', test?.TestID);
+        console.log('🔄 COMPLETE TEST STATE RESET for test:', test?.testid);
         
-        // Force clear timer first
+        // Force clear timer first - CRITICAL
         if (timerRef.current) {
             clearInterval(timerRef.current);
             timerRef.current = null;
+            console.log('✅ Timer interval forcibly cleared');
         }
         
+        // Reset ALL test state
         setQuestions([]);
         setLoading(true);
         setCurrentQuestionIndex(0);
         setSelectedOption(null);
         setAnswers([]);
-        setTimeRemaining(0);
+        setTimeRemaining(0); // RESET TO ZERO - will be set to totalTime when questions load
         setIsTimeWarning(false);
-        setTimerActive(false);
+        setTimerActive(false); // TIMER INACTIVE until proper initialization
+        
+        console.log('✅ COMPLETE test state reset finished for test:', test?.testid);
     };
 
     const loadTestQuestions = async () => {
@@ -286,7 +354,10 @@ export default function TestScreen({ navigation, route }) {
                 total: questions.length,
                 timeUsed,
                 totalTime,
-                testData: test,
+                testData: { 
+                    ...test, 
+                    questions: questions  // Include the questions in testData
+                },
                 answers: submissionAnswers
             });
 
