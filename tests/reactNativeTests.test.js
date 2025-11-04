@@ -237,7 +237,10 @@ describe('[TEST] TestScreen Component Testing', () => {
     // Suppress console warnings for TestScreen async operations
     const originalError = console.error;
     console.error = (message, ...args) => {
-      if (typeof message === 'string' && message.includes('An update to TestScreen inside a test was not wrapped in act')) {
+      if (typeof message === 'string' && (
+        message.includes('An update to TestScreen inside a test was not wrapped in act') ||
+        message.includes('Warning: React instrumentation encountered an error')
+      )) {
         return; // Suppress these specific warnings
       }
       originalError(message, ...args);
@@ -245,10 +248,15 @@ describe('[TEST] TestScreen Component Testing', () => {
   });
 
   test('TestScreen renders without crashing', async () => {
-    const { root } = renderTestScreen();
+    const testScreenResult = renderTestScreen();
+    
+    await act(async () => {
+      // Wait for initial async operations to complete
+      await new Promise(resolve => setTimeout(resolve, 200));
+    });
 
     // Should render component successfully
-    expect(root).toBeTruthy();
+    expect(testScreenResult.root).toBeTruthy();
   });
 
   test('TestScreen handles route params correctly', async () => {
@@ -263,42 +271,53 @@ describe('[TEST] TestScreen Component Testing', () => {
       }
     };
 
-    const { root } = renderTestScreen(testRoute);
+    const testScreenResult = renderTestScreen(testRoute);
+    
+    await act(async () => {
+      // Wait for async operations with route params
+      await new Promise(resolve => setTimeout(resolve, 200));
+    });
 
     // Should render with custom route params
-    expect(root).toBeTruthy();
+    expect(testScreenResult.root).toBeTruthy();
   });
 
   test('TestScreen handles missing route params gracefully', async () => {
     const emptyRoute = { params: {} };
     
-    const { root } = renderTestScreen(emptyRoute);
+    const testScreenResult = renderTestScreen(emptyRoute);
+    
+    await act(async () => {
+      // Wait for async operations with empty params
+      await new Promise(resolve => setTimeout(resolve, 200));
+    });
 
-    // Should handle missing test params without crashing
-    expect(root).toBeTruthy();
+    // Should handle empty params without crashing
+    expect(testScreenResult.root).toBeTruthy();
   });
 
   test('TestScreen initializes with proper loading state', async () => {
-    const { root } = renderTestScreen();
+    const testScreenResult = renderTestScreen();
 
     // Component should initialize properly
     await act(async () => {
-      // Allow initial effects to run
+      // Allow initial effects to run with longer wait
+      await new Promise(resolve => setTimeout(resolve, 300));
     });
 
-    expect(root).toBeTruthy();
+    expect(testScreenResult.root).toBeTruthy();
   });
 
   test('TestScreen handles async database operations', async () => {
-    const { root } = renderTestScreen();
+    const testScreenResult = renderTestScreen();
 
     // Wait for async database calls
     await act(async () => {
-      // Allow promises to resolve
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Allow promises to resolve with longer timeout
+      await new Promise(resolve => setTimeout(resolve, 400));
     });
 
-    expect(root).toBeTruthy();
+    expect(testScreenResult.root).toBeTruthy();
   });
 
   test('TestScreen component lifecycle works correctly', async () => {
@@ -314,24 +333,39 @@ describe('[TEST] TestScreen Component Testing', () => {
   });
 
   test('TestScreen handles timer context integration', async () => {
-    const { root } = renderTestScreen();
+    const testScreenResult = renderTestScreen();
+
+    await act(async () => {
+      // Wait for timer context integration
+      await new Promise(resolve => setTimeout(resolve, 200));
+    });
 
     // Should integrate with TestTimerContext
-    expect(root).toBeTruthy();
+    expect(testScreenResult.root).toBeTruthy();
   });
 
   test('TestScreen handles navigation integration', async () => {
-    const { root } = renderTestScreen();
+    const testScreenResult = renderTestScreen();
+
+    await act(async () => {
+      // Wait for navigation integration
+      await new Promise(resolve => setTimeout(resolve, 200));
+    });
 
     // Should work with navigation props
-    expect(root).toBeTruthy();
+    expect(testScreenResult.root).toBeTruthy();
     expect(mockNavigation.navigate).toBeDefined();
   });
 
   test('TestScreen handles authentication context', async () => {
-    const { root } = renderTestScreen();
+    const testScreenResult = renderTestScreen();
 
-    // Should integrate with AuthContext
-    expect(root).toBeTruthy();
+    await act(async () => {
+      // Wait for auth context integration
+      await new Promise(resolve => setTimeout(resolve, 200));
+    });
+
+    // Should work with auth context
+    expect(testScreenResult.root).toBeTruthy();
   });
 });
