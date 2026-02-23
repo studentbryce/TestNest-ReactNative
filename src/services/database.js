@@ -178,29 +178,42 @@ export class DatabaseService {
         return [];
       }
       
-      // Group results by TestID to create test summaries
+      // Group results by TestID AND created_at timestamp to separate multiple attempts
+      // We'll group by rounding timestamps to the nearest minute to handle concurrent submissions
       const testGroups = {};
       
       individualResults.forEach(result => {
         const testID = result.testid;
-        if (!testGroups[testID]) {
-          testGroups[testID] = {
+        // Round timestamp to nearest minute to group questions from same test attempt
+        const timestamp = new Date(result.created_at);
+        const roundedTime = new Date(timestamp.getFullYear(), timestamp.getMonth(), 
+                                     timestamp.getDate(), timestamp.getHours(), 
+                                     timestamp.getMinutes());
+        const attemptKey = `${testID}_${roundedTime.getTime()}`; // Unique key per test attempt
+        
+        if (!testGroups[attemptKey]) {
+          testGroups[attemptKey] = {
             testid: testID,
             tests: result.tests,
             results: [],
             totalQuestions: 0,
             correctAnswers: 0,
-            completedDate: new Date(result.created_at) // Use database created_at timestamp
+            completedDate: roundedTime, // Use rounded time for this attempt
+            earliestTimestamp: timestamp, // Track earliest record
+            latestTimestamp: timestamp // Track latest record
           };
         }
         
-        testGroups[testID].results.push(result);
-        testGroups[testID].totalQuestions++;
+        testGroups[attemptKey].results.push(result);
+        testGroups[attemptKey].totalQuestions++;
         
-        // Update completion date to the latest record's timestamp for this test
+        // Update earliest and latest timestamps for this attempt
         const recordDate = new Date(result.created_at);
-        if (recordDate > testGroups[testID].completedDate) {
-          testGroups[testID].completedDate = recordDate;
+        if (recordDate < testGroups[attemptKey].earliestTimestamp) {
+          testGroups[attemptKey].earliestTimestamp = recordDate;
+        }
+        if (recordDate > testGroups[attemptKey].latestTimestamp) {
+          testGroups[attemptKey].latestTimestamp = recordDate;
         }
         
         // Compare integer answers - convert both to integers for comparison
@@ -210,20 +223,20 @@ export class DatabaseService {
         console.log(`Question ${result.questionid}: Given=${givenAnswer}, Correct=${correctAnswer}, Match=${givenAnswer === correctAnswer}`);
         
         if (givenAnswer === correctAnswer) {
-          testGroups[testID].correctAnswers++;
+          testGroups[attemptKey].correctAnswers++;
         }
       });
       
-      // Convert grouped results to summary format
+      // Convert grouped results to summary format with unique IDs per attempt
       const testSummaries = Object.values(testGroups).map(group => ({
-        resultid: `test_${group.testid}_${parseInt(studentID)}`,
+        resultid: `test_${group.testid}_${parseInt(studentID)}_${group.completedDate.getTime()}`, // Include timestamp in ID
         testid: group.testid,
         studentid: parseInt(studentID),
         Tests: group.tests,
         Score: Math.round((group.correctAnswers / group.totalQuestions) * 100),
         TotalQuestions: group.totalQuestions,
         CorrectAnswers: group.correctAnswers,
-        CompletedAt: group.completedDate.toISOString(),
+        CompletedAt: group.latestTimestamp.toISOString(), // Use latest timestamp for display
         TimeSpent: 300,
         Answers: group.results.map(r => ({
           QuestionID: r.questionid,
@@ -233,7 +246,8 @@ export class DatabaseService {
       }));
       
       console.log('✅ Test summaries created:', testSummaries.length);
-      return testSummaries.sort((a, b) => b.TestID - a.TestID);
+      // Sort by completion date (newest first)
+      return testSummaries.sort((a, b) => new Date(b.CompletedAt) - new Date(a.CompletedAt));
       
     } catch (error) {
       console.error('❌ DatabaseService.getTestResultsByStudent error:', error);

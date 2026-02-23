@@ -209,7 +209,8 @@ export default function ResultsScreen({ navigation, route }) {
 
   // Function to handle clicking on historical results
   const handleHistoricalResultClick = async (result) => {
-    const resultKey = `${result.testid}_${result.studentid}`;
+    // Use unique result ID that includes timestamp
+    const resultKey = result.resultid || `${result.testid}_${result.studentid}_${result.CompletedAt}`;
     
     // If already expanded, collapse it
     if (expandedHistoryResult === resultKey) {
@@ -250,7 +251,8 @@ export default function ResultsScreen({ navigation, route }) {
 
   // Function to render historical question results
   const renderHistoricalQuestionResults = (result) => {
-    const resultKey = `${result.testid}_${result.studentid}`;
+    // Use unique result ID that includes timestamp
+    const resultKey = result.resultid || `${result.testid}_${result.studentid}_${result.CompletedAt}`;
     const questions = historicalQuestions[resultKey];
     
     if (!questions || questions.length === 0) {
@@ -711,7 +713,8 @@ export default function ResultsScreen({ navigation, route }) {
             <View style={globalStyles.section}>
               <Text style={globalStyles.sectionTitle}>Your Test Results ({previousResults.length})</Text>
               {previousResults.map((result, index) => {
-                const resultKey = `${result.testid}_${result.studentid}`;
+                // Use unique result ID that includes timestamp
+                const resultKey = result.resultid || `${result.testid}_${result.studentid}_${result.CompletedAt}`;
                 const isExpanded = expandedHistoryResult === resultKey;
                 
                 return (
@@ -742,7 +745,7 @@ export default function ResultsScreen({ navigation, route }) {
                           {result.Tests?.testtitle || `Test ${result.TestID}`}
                         </Text>
                         <Text style={globalStyles.menuSubtitle}>
-                          Score: {result.Score || 0}% • {formatDate(result.CompletedAt)}
+                          📅 {formatDate(result.CompletedAt)} • Score: {result.Score || 0}%
                         </Text>
                         <Text style={[globalStyles.menuSubtitle, { fontSize: 12 }]}>
                           Questions: {result.TotalQuestions || 0} • Correct: {result.CorrectAnswers || 0}
